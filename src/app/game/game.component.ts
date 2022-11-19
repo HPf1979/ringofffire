@@ -14,6 +14,7 @@ export class GameComponent implements OnInit {
   pickCardAnimation = false;
   currentCard: string = '';
   game: Game;
+  gameID: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -24,11 +25,12 @@ export class GameComponent implements OnInit {
   ngOnInit(): void {
     this.newGame();
     this.route.params.subscribe((params) => {
-      console.log(params['id']);
+      //console.log(params['id']);
+      this.gameID = params['id'];
 
       this.firestore
         .collection('games')
-        .doc(params['id'])
+        .doc(this.gameID)
         .valueChanges()
         .subscribe((game: any) => {
           console.log('Game update', game);
@@ -68,7 +70,15 @@ export class GameComponent implements OnInit {
     dialogRef.afterClosed().subscribe((name: string) => {
       if (name && name.length > 0) {
         this.game.players.push(name);
+        this.saveGame();
       }
     });
+  }
+
+  saveGame() {
+    this.firestore
+      .collection('games')
+      .doc(this.gameID)
+      .update(this.game.toJson);
   }
 }
